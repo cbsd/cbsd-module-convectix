@@ -1,0 +1,31 @@
+init_ssh()
+{
+	readconf freecloud.conf
+
+	[ -z "${orig_vm_os_type}" ] && orig_vm_os_type="${vm_os_type}"
+
+	# client IP
+	case "${orig_vm_os_type}" in
+		linux)
+			[ -z "${convectix_srv_linux_ip}" -o "${convectix_srv_linux_ip}" = "unset" ] && err 1 "${MAGENTA}Please set in freecloud.conf: ${GREEN}convectix_srv_linux_ip${NORMAL}"
+			consumerip="${convectix_srv_linux_ip}"
+			;;
+		freebsd)
+			[ -z "${convectix_srv_freebsd_ip}" -o "${convectix_srv_freebsd_ip}" = "unset" ] && err 1 "${MAGENTA}Please set in freecloud.conf: ${GREEN}convectix_srv_freebsd_ip${NORMAL}"
+			consumerip="${convectix_srv_freebsd_ip}"
+			;;
+		*)
+			err 1 "vm_ssh.subr: Unsupported type: ${orig_vm_os_type}"
+			;;
+	esac
+
+	[ -z "${listenip}" ] && listenip="${nodeip}"
+
+	if [ -z "${convectix_ssh_privatekey}" ]; then
+		_md5name=$( /sbin/md5 -qs ${nodename} )
+		convectix_ssh_privatekey="${sshdir}/${_md5name}.id_rsa"
+	fi
+
+	ssh_cmd="/usr/bin/ssh -tt -oConnectionAttempts=2 -oConnectTimeout=2 -oPort=22 -i ${convectix_ssh_privatekey} root@${consumerip}"
+	scp_cmd="/usr/bin/scp -i ${convectix_ssh_privatekey}"
+}
