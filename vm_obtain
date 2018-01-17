@@ -162,7 +162,7 @@ else
 	# >>                   MB     KB      B <<
 fi
 
-# Check vm_ram value
+## Check vm_ram value
 if is_number ${orig_vm_ram}; then
 	# not number, try to convert
 	if conv2bytes "${orig_vm_ram}"; then
